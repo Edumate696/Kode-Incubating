@@ -1,0 +1,52 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+    <id>build</id>
+    <formats>
+        <format>dir</format>
+    </formats>
+    <!--<includeBaseDirectory>true</includeBaseDirectory>-->
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>include</outputDirectory>
+            <excludes>
+                <exclude>${artifact}</exclude>
+            </excludes>
+            <fileMode>0777</fileMode>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <!-- README -->
+            <directory>${project.basedir}</directory>
+            <outputDirectory></outputDirectory>
+            <fileMode>0777</fileMode>
+            <filtered>true</filtered>
+            <includes>
+                <include>README*</include>
+                <include>LICENSE*</include>
+                <include>NOTICE*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <!-- BIN -->
+            <directory>${project.basedir}/src/main/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <filtered>true</filtered>
+            <fileMode>0777</fileMode>
+        </fileSet>
+        <fileSet>
+            <!-- lib -->
+            <directory>${project.basedir}/src/main/standard-lib</directory>
+            <outputDirectory>lib</outputDirectory>
+            <filtered>false</filtered>
+            <fileMode>0777</fileMode>
+        </fileSet>
+        <fileSet>
+            <!-- class -->
+            <directory>${project.build.outputDirectory}</directory>
+            <outputDirectory>boot</outputDirectory>
+            <fileMode>0777</fileMode>
+        </fileSet>
+    </fileSets>
+</assembly>
