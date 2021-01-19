@@ -101,6 +101,9 @@ public class Lexer {
             case ';':
                 emitToken(SEMICOLON);
                 break;
+            case '=':
+                emitToken(EQUAL);
+                break;
             // White Space
             case ' ':
             case '\r':
@@ -113,7 +116,7 @@ public class Lexer {
             default:
                 if (isDigit(c)) {
                     number();
-                } else if (isAlpha(c) && false) {
+                } else if (isAlpha(c)) {
                     identifier();
                 } else {
                     // Error Handling

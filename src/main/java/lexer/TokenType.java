@@ -9,8 +9,7 @@ package lexer;
  *
  * @author dell
  */
-public enum TokenType{
+public enum TokenType {
     MINUS, PLUS, SLASH, STAR, LEFT_PAREN, RIGHT_PAREN,
-    
-    NUMBER, IDENTIFIER, EOF, SEMICOLON,
+    NUMBER, IDENTIFIER, EOF, SEMICOLON, EQUAL,
 }
