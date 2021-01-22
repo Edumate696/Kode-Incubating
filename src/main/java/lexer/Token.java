@@ -10,7 +10,7 @@ package lexer;
  * @author dell
  */
 public class Token {
-    
+
     public final TokenType type;
     public final String lexeme;
     public final Object literal;
@@ -18,7 +18,7 @@ public class Token {
     public final int line;
     public final String fn;
 
-    protected Token(TokenType type, String lexeme, Object literal, int line,String line_text,String fn) {
+    protected Token(TokenType type, String lexeme, Object literal, int line, String line_text, String fn) {
         this.type = type;
         this.lexeme = lexeme;
         this.literal = literal;

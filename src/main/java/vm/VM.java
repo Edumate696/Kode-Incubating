@@ -5,11 +5,10 @@
  */
 package vm;
 
+import compiler.Byte;
 import compiler.Compiler;
 import compiler.Chunk;
-import compiler.Opcode;
 import io.Printer;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.function.BiFunction;
@@ -50,16 +49,10 @@ public class VM {
     private boolean debug;
 
     private void evaluate(Chunk chunk) {
-        Iterator<Value> const_iterator = chunk.const_iterator();
-        for (Opcode op : chunk) {
-            Value operand = null;
-            switch (op) {
+        for (Byte op : chunk) {
+            switch (op.getOpcode()) {
                 case OP_PUSH:
-                    operand = const_iterator.next();
-            }
-            switch (op) {
-                case OP_PUSH:
-                    push(operand);
+                    push(op.getOperand());
                     break;
                 case OP_POP:
                     this.result = pop();

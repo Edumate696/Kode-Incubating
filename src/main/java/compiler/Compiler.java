@@ -38,7 +38,7 @@ public class Compiler {
             Printer.out.println();
             Printer.out.println("             BYTECODE");
             Printer.out.println("----------------------------------");
-            current_chunk.printDebug();
+//            current_chunk.printDebug();
             Printer.out.println();
         }
     }
@@ -54,7 +54,16 @@ public class Compiler {
     }
 
     private void expression() {
-        addition();
+        assignment();
+    }
+
+    private void assignment() {
+        addition(); // Expr
+
+//        if (match(EQUAL)) {
+//            Token equals = previous();
+//            assignment(); // Value
+//        }
     }
 
     private void addition() {
@@ -112,6 +121,8 @@ public class Compiler {
         } else if (match(LEFT_PAREN)) {
             expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
+        } else if (match(IDENTIFIER)) {
+            emitByte(OP_PUSH, previous().literal);
         } else {
             throw error(peek(), "Expect expression.");
         }
@@ -163,12 +174,11 @@ public class Compiler {
     }
 
     private void emitByte(Opcode op, Object operand) {
-        emitByte(op);
-        this.current_chunk.emitConstant(operand);
+        this.current_chunk.emitByte(previous(), op, operand);
     }
 
     private void emitByte(Opcode op) {
-        this.current_chunk.emitByte(op);
+        emitByte(op, null);
     }
 
     private RuntimeException error(Token token, String message) {
