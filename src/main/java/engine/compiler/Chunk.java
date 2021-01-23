@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package compiler;
+package engine.compiler;
 
+import enums.OpcodeTable;
 import java.util.LinkedList;
-import lexer.Token;
+import engine.lexer.Token;
 
 /**
  *
@@ -21,8 +22,12 @@ public final class Chunk extends LinkedList<Byte> {
     private Chunk() {
     }
 
-    void emitByte(Token tok, Opcode op, Object operand) {
+    protected void emitByte(Token tok, OpcodeTable op, Object operand) {
         this.addLast(new Byte(op, operand));
+    }
+
+    protected Byte removeByte() {
+        return this.removeLast();
     }
 
 }

@@ -3,14 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package compiler;
+package enums;
 
 /**
  *
  * @author dell
  */
-public enum Opcode {
-    OP_PUSH, OP_POP,
-    
-    OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_POS, OP_NEG
+public enum TokenType {
+    MINUS, PLUS, SLASH, STAR, LEFT_PAREN, RIGHT_PAREN,
+    NUMBER, IDENTIFIER, EOF, SEMICOLON, EQUAL,
 }

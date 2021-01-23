@@ -3,13 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package lexer;
+package enums;
 
 /**
  *
  * @author dell
  */
-public enum TokenType {
-    MINUS, PLUS, SLASH, STAR, LEFT_PAREN, RIGHT_PAREN,
-    NUMBER, IDENTIFIER, EOF, SEMICOLON, EQUAL,
+public enum OpcodeTable {
+    CONST, POP, // Maybe replaced with RETURN in future
+    ADD, SUB, MUL, DIV, // Binary Operations
+    POS, NEG, // Unary Operations
+    LOAD, STORE, // Variable
 }

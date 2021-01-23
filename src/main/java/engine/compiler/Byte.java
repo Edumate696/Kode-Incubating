@@ -3,7 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package compiler;
+package engine.compiler;
+
+import enums.OpcodeTable;
 
 /**
  *
@@ -11,20 +13,29 @@ package compiler;
  */
 public class Byte {
 
-    private final Opcode opcode;
+    private final OpcodeTable opcode;
     private final Object operand;
 
-    protected Byte(Opcode opcode, Object operand) {
+    protected Byte(OpcodeTable opcode, Object operand) {
         this.opcode = opcode;
         this.operand = operand;
     }
 
-    public Opcode getOpcode() {
+    public OpcodeTable getOpcode() {
         return opcode;
     }
 
     public <T> T getOperand() {
         return (T) operand;
     }
-    
+
+    @Override
+    public String toString() {
+        if (this.operand == null) {
+            return "" + this.opcode;
+        }else{
+            return "" + this.opcode + " " + this.operand;
+        }
+    }
+
 }

@@ -3,17 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package vm;
+package engine.vm;
 
-import compiler.Byte;
-import compiler.Compiler;
-import compiler.Chunk;
+import engine.compiler.Byte;
+import engine.compiler.Compiler;
+import engine.compiler.Chunk;
 import io.Printer;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import value.Value;
+import engine.vm.value.Value;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -45,41 +47,48 @@ public class VM {
     }
 
     private Object result = null;
-    Stack<Value> arithmatic_stack = new Stack<>();
+    private final Stack<Value> arithmatic_stack = new Stack<>();
     private boolean debug;
+    private Map<String, Value> table = new HashMap<>();
 
     private void evaluate(Chunk chunk) {
-        for (Byte op : chunk) {
-            switch (op.getOpcode()) {
-                case OP_PUSH:
-                    push(op.getOperand());
+        for (Byte b : chunk) {
+            switch (b.getOpcode()) {
+                case CONST:
+                    push(Value.generate(b.getOperand()));
                     break;
-                case OP_POP:
+                case POP:
                     this.result = pop();
                     break;
-                case OP_ADD:
+                case ADD:
                     binary_operation(Value::__add__);
                     break;
-                case OP_SUB:
+                case SUB:
                     binary_operation(Value::__sub__);
                     break;
-                case OP_MUL:
+                case MUL:
                     binary_operation(Value::__mul__);
                     break;
-                case OP_DIV:
+                case DIV:
                     binary_operation(Value::__div__);
                     break;
-                case OP_POS:
+                case POS:
                     unary_operation(Value::__pos__);
                     break;
-                case OP_NEG:
+                case NEG:
                     unary_operation(Value::__neg__);
                     break;
+                case LOAD:
+                    push(retriveVariable(b.getOperand()));
+                    break;
+                case STORE:
+                    storeVariable(b.getOperand(), peek());
+                    break;
                 default:
-                    throw new RuntimeException("Unknown Opcode : " + op);
+                    throw new RuntimeException("Unknown Instruction : " + b);
             }
             if (this.debug) {
-                Printer.out.format("%-20s ", op);
+                Printer.out.format("%-20s ", b);
                 Printer.out.println(this.arithmatic_stack);
             }
         }
@@ -96,11 +105,26 @@ public class VM {
     }
 
     private void push(Value constant) {
-        arithmatic_stack.push(Objects.<Value>requireNonNull(constant, "Null value cannot be pushed."));
+        arithmatic_stack.push(Objects.requireNonNull(constant, "Null value cannot be pushed."));
     }
 
     private Value pop() {
         return arithmatic_stack.pop();
+    }
+    
+    private Value peek() {
+        return arithmatic_stack.peek();
+    }
+
+    private Value retriveVariable(String name) {
+        if (table.containsKey(name)) {
+            return table.get(name);
+        }
+        throw new RuntimeException("Variable '" + name + "' not defind.");
+    }
+    
+    private void storeVariable(String name, Value value) {
+        table.put(name, value);
     }
 
 }

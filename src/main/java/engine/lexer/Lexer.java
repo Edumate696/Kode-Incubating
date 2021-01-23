@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package lexer;
+package engine.lexer;
 
+import enums.TokenType;
 import dnl.utils.text.table.TextTable;
 import io.Printer;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.DefaultTableModel;
-import static lexer.TokenType.*;
+import static enums.TokenType.*;
 
 /**
  *

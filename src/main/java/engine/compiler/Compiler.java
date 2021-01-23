@@ -3,15 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package compiler;
+package engine.compiler;
 
-import static compiler.Opcode.*;
+import enums.OpcodeTable;
+import static enums.OpcodeTable.*;
 import io.Printer;
 import java.util.List;
-import lexer.Lexer;
-import lexer.Token;
-import lexer.TokenType;
-import static lexer.TokenType.*;
+import engine.lexer.Lexer;
+import engine.lexer.Token;
+import enums.TokenType;
+import static enums.TokenType.*;
 
 /**
  *
@@ -38,7 +39,9 @@ public class Compiler {
             Printer.out.println();
             Printer.out.println("             BYTECODE");
             Printer.out.println("----------------------------------");
-//            current_chunk.printDebug();
+            for (Byte b : current_chunk) {
+                Printer.out.println(b);
+            }
             Printer.out.println();
         }
     }
@@ -50,7 +53,7 @@ public class Compiler {
     private void expressionStatement() {
         expression();
         consume(SEMICOLON, "Expect ';' after expression.");
-        emitByte(OP_POP);
+        emitByte(POP);
     }
 
     private void expression() {
@@ -60,10 +63,15 @@ public class Compiler {
     private void assignment() {
         addition(); // Expr
 
-//        if (match(EQUAL)) {
+        if (match(EQUAL)) {
 //            Token equals = previous();
-//            assignment(); // Value
-//        }
+            Byte b = removeByte();
+            assignment(); // Value
+            
+            if(b.getOpcode() == LOAD){
+                emitByte(STORE, b.getOperand());
+            }
+        }
     }
 
     private void addition() {
@@ -73,10 +81,10 @@ public class Compiler {
             multiplication();
             switch (operator.type) {
                 case MINUS:
-                    emitByte(OP_SUB);
+                    emitByte(SUB);
                     break;
                 case PLUS:
-                    emitByte(OP_ADD);
+                    emitByte(ADD);
                     break;
             }
         }
@@ -89,10 +97,10 @@ public class Compiler {
             unary();
             switch (operator.type) {
                 case SLASH:
-                    emitByte(OP_DIV);
+                    emitByte(DIV);
                     break;
                 case STAR:
-                    emitByte(OP_MUL);
+                    emitByte(MUL);
                     break;
             }
         }
@@ -104,10 +112,10 @@ public class Compiler {
             unary();
             switch (operator.type) {
                 case MINUS:
-                    emitByte(OP_NEG);
+                    emitByte(NEG);
                     break;
                 case PLUS:
-                    emitByte(OP_POS);
+                    emitByte(POS);
                     break;
             }
         } else {
@@ -117,12 +125,12 @@ public class Compiler {
 
     private void primary() {
         if (match(NUMBER)) {
-            emitByte(OP_PUSH, previous().literal);
+            emitByte(CONST, previous().literal);
         } else if (match(LEFT_PAREN)) {
             expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
         } else if (match(IDENTIFIER)) {
-            emitByte(OP_PUSH, previous().literal);
+            emitByte(LOAD, previous().lexeme);
         } else {
             throw error(peek(), "Expect expression.");
         }
@@ -173,12 +181,16 @@ public class Compiler {
         return tokens.get(current - 1);
     }
 
-    private void emitByte(Opcode op, Object operand) {
+    private void emitByte(OpcodeTable op, Object operand) {
         this.current_chunk.emitByte(previous(), op, operand);
     }
 
-    private void emitByte(Opcode op) {
+    private void emitByte(OpcodeTable op) {
         emitByte(op, null);
+    }
+    
+    private Byte removeByte(){
+        return this.current_chunk.removeByte();
     }
 
     private RuntimeException error(Token token, String message) {
