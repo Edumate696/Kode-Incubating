@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package engine.compiler;
+package internels.compiler;
 
 import enums.OpcodeTable;
 import static enums.OpcodeTable.*;
 import io.Printer;
 import java.util.List;
-import engine.lexer.Lexer;
-import engine.lexer.Token;
+import internels.lexer.Lexer;
+import internels.lexer.Token;
 import enums.TokenType;
 import static enums.TokenType.*;
 

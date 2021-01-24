@@ -3,17 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package engine.vm;
+package internels.vm;
 
-import engine.compiler.Byte;
-import engine.compiler.Compiler;
-import engine.compiler.Chunk;
+import internels.compiler.Byte;
+import internels.compiler.Compiler;
+import internels.compiler.Chunk;
 import io.Printer;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import engine.vm.value.Value;
+import internels.vm.value.Value;
 import java.util.HashMap;
 import java.util.Map;
 

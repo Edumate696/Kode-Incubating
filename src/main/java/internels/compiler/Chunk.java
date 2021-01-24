@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package engine.compiler;
+package internels.compiler;
 
 import enums.OpcodeTable;
 import java.util.LinkedList;
-import engine.lexer.Token;
+import internels.lexer.Token;
 
 /**
  *

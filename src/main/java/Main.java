@@ -1,7 +1,7 @@
 
 import io.Printer;
 import io.Scanner;
-import engine.vm.VM;
+import internels.vm.VM;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -18,7 +18,6 @@ public class Main {
         Printer.out.println("Kode Incubating");
         Printer.out.println("Running on " + System.getProperty("os.name", "Unknown Operating System")
                 + " (" + System.getProperty("user.name", "default") + ")");
-        System.setProperty("kode.debug", "true");
         VM vm = new VM();
         for (;;) {
             try {
@@ -29,7 +28,7 @@ public class Main {
                 }
                 Printer.out.println(vm.eval("<shell>", line));
             } catch (Exception e) {
-                Printer.err.println(e.getMessage());
+                Printer.err.println("Error : " + e.getMessage());
             }
         }
     }
