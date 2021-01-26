@@ -14,7 +14,7 @@ import internels.vm.VM;
  */
 public class Main {
 
-    public static void main(String[] args) {
+    private static void REPL() {
         Printer.out.println("Kode Incubating");
         Printer.out.println("Running on " + System.getProperty("os.name", "Unknown Operating System")
                 + " (" + System.getProperty("user.name", "default") + ")");
@@ -31,5 +31,9 @@ public class Main {
                 Printer.err.println("Error : " + e.getMessage());
             }
         }
+    }
+
+    public static void main(String[] args) {
+        Main.REPL();
     }
 }

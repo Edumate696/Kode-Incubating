@@ -8,14 +8,13 @@ package internels.vm;
 import internels.compiler.Byte;
 import internels.compiler.Compiler;
 import internels.compiler.Chunk;
+import internels.vm.scopes.Scope;
 import io.Printer;
 import java.util.Objects;
-import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import internels.vm.value.Value;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import internels.vm.type.Type;
 
 /**
  *
@@ -47,36 +46,37 @@ public class VM {
     }
 
     private Object result = null;
-    private final Stack<Value> arithmatic_stack = new Stack<>();
+    private final LinkedList<Type> arithmatic_stack = new LinkedList<>();
     private boolean debug;
-    private Map<String, Value> table = new HashMap<>();
+    private final Scope global_table = Scope.buildDefaultScope();
+    private final LinkedList<Scope> local_table = new LinkedList<>();
 
     private void evaluate(Chunk chunk) {
         for (Byte b : chunk) {
             switch (b.getOpcode()) {
                 case CONST:
-                    push(Value.generate(b.getOperand()));
+                    push(Type.generate(b.getOperand()));
                     break;
                 case POP:
                     this.result = pop();
                     break;
                 case ADD:
-                    binary_operation(Value::__add__);
+                    binary_operation(Type::__add__);
                     break;
                 case SUB:
-                    binary_operation(Value::__sub__);
+                    binary_operation(Type::__sub__);
                     break;
                 case MUL:
-                    binary_operation(Value::__mul__);
+                    binary_operation(Type::__mul__);
                     break;
                 case DIV:
-                    binary_operation(Value::__div__);
+                    binary_operation(Type::__div__);
                     break;
                 case POS:
-                    unary_operation(Value::__pos__);
+                    unary_operation(Type::__pos__);
                     break;
                 case NEG:
-                    unary_operation(Value::__neg__);
+                    unary_operation(Type::__neg__);
                     break;
                 case LOAD:
                     push(retriveVariable(b.getOperand()));
@@ -94,37 +94,51 @@ public class VM {
         }
     }
 
-    private void binary_operation(BiFunction<Value, Value, Value> op) {
-        Value right = pop();
-        Value left = pop();
+    private void binary_operation(BiFunction<Type, Type, Type> op) {
+        Type right = pop();
+        Type left = pop();
         push(op.apply(left, right));
     }
 
-    private void unary_operation(Function<Value, Value> op) {
+    private void unary_operation(Function<Type, Type> op) {
         push(op.apply(pop()));
     }
 
-    private void push(Value constant) {
+    private void push(Type constant) {
         arithmatic_stack.push(Objects.requireNonNull(constant, "Null value cannot be pushed."));
     }
 
-    private Value pop() {
+    private Type pop() {
         return arithmatic_stack.pop();
     }
-    
-    private Value peek() {
+
+    private Type peek() {
         return arithmatic_stack.peek();
     }
 
-    private Value retriveVariable(String name) {
-        if (table.containsKey(name)) {
-            return table.get(name);
+    private Type retriveVariable(String name) {
+        Type v;
+        for (Scope s:local_table) {
+            if ((v = s.retriveVariable(name)) != null) {
+                return v;
+            }
+        }
+        if ((v = global_table.retriveVariable(name)) != null) {
+            return v;
         }
         throw new RuntimeException("Variable '" + name + "' not defind.");
     }
-    
-    private void storeVariable(String name, Value value) {
-        table.put(name, value);
+
+    private void storeVariable(String name, Type value) {
+        if (local_table.isEmpty()) {
+            global_table.storeVariable(name, value);
+        } else {
+            local_table.peek().storeVariable(name, value);
+        }
+    }
+
+    public Scope getGlobalTable() {
+        return global_table;
     }
 
 }

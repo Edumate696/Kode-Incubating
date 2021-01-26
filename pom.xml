@@ -21,11 +21,6 @@
             <artifactId>j-text-utils</artifactId>
             <version>0.3.4</version>
         </dependency>
-        <dependency>
-            <groupId>org.update4j</groupId>
-            <artifactId>update4j</artifactId>
-            <version>1.5.6</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
