@@ -29,6 +29,9 @@ public class Lexer {
 
     static {
         KEYWORDS = new HashMap<>();
+        KEYWORDS.put("global", TT_GLOBAL);
+        KEYWORDS.put("nonlocal", TT_NON_LOCAL);
+        KEYWORDS.put("exit", TT_EXIT);
     }
 
     private final String source;
@@ -47,7 +50,7 @@ public class Lexer {
 //            scanToken();
             scanToken();
         }
-        emitToken(EOF);
+        emitToken(TT_EOF);
 
         // DEBUG
         if (Boolean.getBoolean("kode.debug") || Boolean.getBoolean("kode.debug.lexer")) {
@@ -70,7 +73,7 @@ public class Lexer {
 
     private void emitToken(TokenType type, Object literal) {
         String line_text = source.split("\n", -1)[line - 1];
-        tokens.add(new Token(type, type == EOF ? "" : source.substring(start, current), literal, line, line_text, fn));
+        tokens.add(new Token(type, type == TT_EOF ? "" : source.substring(start, current), literal, line, line_text, fn));
     }
 
     private boolean isAtEnd() {
@@ -82,28 +85,31 @@ public class Lexer {
         switch (c) {
             // Single Char Lexemes
             case '(':
-                emitToken(LEFT_PAREN);
+                emitToken(TT_LEFT_PAREN);
                 break;
             case ')':
-                emitToken(RIGHT_PAREN);
+                emitToken(TT_RIGHT_PAREN);
                 break;
             case '-':
-                emitToken(MINUS);
+                emitToken(TT_MINUS);
                 break;
             case '+':
-                emitToken(PLUS);
+                emitToken(TT_PLUS);
                 break;
             case '*':
-                emitToken(STAR);
+                emitToken(TT_STAR);
                 break;
             case '/':
-                emitToken(SLASH);
+                emitToken(TT_SLASH);
                 break;
             case ';':
-                emitToken(SEMICOLON);
+                emitToken(TT_SEMICOLON);
+                break;
+            case ',':
+                emitToken(TT_COMMA);
                 break;
             case '=':
-                emitToken(EQUAL);
+                emitToken(TT_EQUAL);
                 break;
             // White Space
             case ' ':
@@ -173,7 +179,7 @@ public class Lexer {
                 advance();
             }
         }
-        emitToken(NUMBER, Double.valueOf(source.substring(start, current)));
+        emitToken(TT_NUMBER, Double.valueOf(source.substring(start, current)));
     }
 
     private void identifier() {
@@ -186,7 +192,7 @@ public class Lexer {
 
         TokenType type = KEYWORDS.get(text);
         if (type == null) {
-            type = IDENTIFIER;
+            type = TT_IDENTIFIER;
         }
         emitToken(type);
     }

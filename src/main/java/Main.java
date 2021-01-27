@@ -1,7 +1,9 @@
 
+import static enums.OpcodeTable.OP_POP;
 import io.Printer;
 import io.Scanner;
 import internels.vm.VM;
+import internels.vm.type.Type;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -12,7 +14,11 @@ import internels.vm.VM;
  *
  * @author dell
  */
-public class Main {
+public final class Main {
+
+    private Main() {
+
+    }
 
     private static void REPL() {
         Printer.out.println("Kode Incubating");
@@ -26,9 +32,14 @@ public class Main {
                 if (line.equalsIgnoreCase("exit")) {
                     System.exit(0);
                 }
-                Printer.out.println(vm.eval("<shell>", line));
-            } catch (Exception e) {
-                Printer.err.println("Error : " + e.getMessage());
+                Type result = vm.eval("<shell>", line);
+                if (result != null) {
+                    Printer.out.println(result);
+                }
+            } catch (Exception error) {
+                String clsName = error.getClass().getSimpleName();
+                String msg = error.getLocalizedMessage();
+                Printer.err.println((msg != null) ? (clsName + ": " + msg) : clsName);
             }
         }
     }

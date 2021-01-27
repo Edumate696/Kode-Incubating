@@ -10,6 +10,11 @@ package enums;
  * @author dell
  */
 public enum TokenType {
-    MINUS, PLUS, SLASH, STAR, LEFT_PAREN, RIGHT_PAREN,
-    NUMBER, IDENTIFIER, EOF, SEMICOLON, EQUAL,
+    TT_MINUS, TT_PLUS, TT_SLASH, TT_STAR, // Arithmatic Operators
+    TT_EQUAL, // Assignment and Comparison
+    TT_LEFT_PAREN, TT_RIGHT_PAREN, // Paren
+    TT_NUMBER, TT_IDENTIFIER, //
+    TT_COMMA, TT_SEMICOLON, TT_EOF, //Symbols
+    // Keywords
+    TT_GLOBAL, TT_NON_LOCAL, TT_EXIT,
 }

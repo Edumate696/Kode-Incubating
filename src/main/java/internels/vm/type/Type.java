@@ -17,7 +17,7 @@ public interface Type {
         } else if (obj instanceof Type) {
             return (Type) obj;
         } else {
-            throw new RuntimeException("Unidentified Value");
+            throw new RuntimeException("Unidentified Constant -> " + obj);
         }
     }
 
@@ -32,5 +32,17 @@ public interface Type {
     public Type __pos__();
 
     public Type __neg__();
+
+    public default Type __getter__(Type name) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public default void __setter__(Type name, Type value) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public default void __caller__(Type... args) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
 }

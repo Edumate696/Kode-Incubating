@@ -10,8 +10,12 @@ package enums;
  * @author dell
  */
 public enum OpcodeTable {
-    CONST, POP, // Maybe replaced with RETURN in future
-    ADD, SUB, MUL, DIV, // Binary Operations
-    POS, NEG, // Unary Operations
-    LOAD, STORE, // Variable
+    OP_CONST, OP_POP, // Maybe replaced with RETURN in future
+    OP_ADD, OP_SUB, OP_MUL, OP_DIV, // Binary Operations
+    OP_POS, OP_NEG, // Unary Operations
+    OP_LOAD, OP_STORE, // Variable
+
+    OP_GLOBAL, OP_NON_LOCAL, // Scoping
+    OP_EXIT,
+
 }

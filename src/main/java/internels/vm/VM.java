@@ -15,6 +15,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.LinkedList;
 import internels.vm.type.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -22,7 +24,7 @@ import internels.vm.type.Type;
  */
 public class VM {
 
-    public Object eval(String fn, String src) {
+    public Type eval(String fn, String src) {
         Chunk chunk = Compiler.parse(fn, src);
         debug = Boolean.getBoolean("kode.debug") || Boolean.getBoolean("kode.debug.vm");
         result = null;
@@ -45,44 +47,54 @@ public class VM {
         return result;
     }
 
-    private Object result = null;
+    private Type result = null;
     private final LinkedList<Type> arithmatic_stack = new LinkedList<>();
     private boolean debug;
     private final Scope global_table = Scope.buildDefaultScope();
     private final LinkedList<Scope> local_table = new LinkedList<>();
+    private final Map<String, Boolean> custom_binding = new HashMap<>();
 
     private void evaluate(Chunk chunk) {
         for (Byte b : chunk) {
             switch (b.getOpcode()) {
-                case CONST:
+                case OP_CONST:
                     push(Type.generate(b.getOperand()));
                     break;
-                case POP:
+                case OP_POP:
                     this.result = pop();
                     break;
-                case ADD:
+                case OP_ADD:
                     binary_operation(Type::__add__);
                     break;
-                case SUB:
+                case OP_SUB:
                     binary_operation(Type::__sub__);
                     break;
-                case MUL:
+                case OP_MUL:
                     binary_operation(Type::__mul__);
                     break;
-                case DIV:
+                case OP_DIV:
                     binary_operation(Type::__div__);
                     break;
-                case POS:
+                case OP_POS:
                     unary_operation(Type::__pos__);
                     break;
-                case NEG:
+                case OP_NEG:
                     unary_operation(Type::__neg__);
                     break;
-                case LOAD:
+                case OP_LOAD:
                     push(retriveVariable(b.getOperand()));
                     break;
-                case STORE:
+                case OP_STORE:
                     storeVariable(b.getOperand(), peek());
+                    break;
+                case OP_GLOBAL:
+                    custom_binding.put(b.getOperand(), true);
+                    break;
+                case OP_NON_LOCAL:
+                    custom_binding.put(b.getOperand(), false);
+                    break;
+                case OP_EXIT:
+                    exitStmtCall(pop());
                     break;
                 default:
                     throw new RuntimeException("Unknown Instruction : " + b);
@@ -118,7 +130,7 @@ public class VM {
 
     private Type retriveVariable(String name) {
         Type v;
-        for (Scope s:local_table) {
+        for (Scope s : local_table) {
             if ((v = s.retriveVariable(name)) != null) {
                 return v;
             }
@@ -130,15 +142,29 @@ public class VM {
     }
 
     private void storeVariable(String name, Type value) {
-        if (local_table.isEmpty()) {
+        if (local_table.isEmpty() || Objects.equals(custom_binding.get(name), Boolean.TRUE)) { // GLOBAL
             global_table.storeVariable(name, value);
-        } else {
+        } else if (Objects.equals(custom_binding.get(name), Boolean.FALSE)) { // NON_LOCAL
+            for (Scope s : local_table) {
+                if (s.retriveVariable(name) != null) {
+                    s.storeVariable(name, value);
+                    return;
+                }
+            }
+            if (global_table.retriveVariable(name) != null) {
+                global_table.storeVariable(name, value);
+            }
+        } else { // LOCAL
             local_table.peek().storeVariable(name, value);
         }
     }
 
     public Scope getGlobalTable() {
         return global_table;
+    }
+
+    private void exitStmtCall(Type exitCode) {
+        System.exit(Double.valueOf(exitCode.toString()).intValue());
     }
 
 }

@@ -47,13 +47,40 @@ public class Compiler {
     }
 
     private void statement() {
-        expressionStatement();
+        if (match(TT_GLOBAL, TT_NON_LOCAL)) {
+            scopeDeclarationStatement();
+        } else if (match(TT_EXIT)) {
+            exitStatement();
+        } else {
+            expressionStatement();
+        }
+    }
+
+    private void exitStatement() {
+        if (!match(TT_SEMICOLON)) {
+            expression();
+            consume(TT_SEMICOLON, "Expect ';' after exit statement.");
+        } else {
+            emitByte(OP_CONST, 0.0);
+        }
+        emitByte(OP_EXIT);
+    }
+
+    private void scopeDeclarationStatement() {
+        OpcodeTable opcode = previous().type == TT_GLOBAL ? OP_GLOBAL : OP_NON_LOCAL;
+        do {
+            Token name = consume(TT_IDENTIFIER, "Expect variable name.");
+            emitByte(opcode, name.lexeme);
+        } while (match(TT_COMMA));
+        consume(TT_SEMICOLON, "Expect ';' after variable name.");
     }
 
     private void expressionStatement() {
-        expression();
-        consume(SEMICOLON, "Expect ';' after expression.");
-        emitByte(POP);
+        if (!match(TT_SEMICOLON)) {
+            expression();
+            consume(TT_SEMICOLON, "Expect ';' after expression.");
+            emitByte(OP_POP);
+        }
     }
 
     private void expression() {
@@ -63,28 +90,28 @@ public class Compiler {
     private void assignment() {
         addition(); // Expr
 
-        if (match(EQUAL)) {
+        if (match(TT_EQUAL)) {
 //            Token equals = previous();
             Byte b = removeByte();
             assignment(); // Value
-            
-            if(b.getOpcode() == LOAD){
-                emitByte(STORE, b.getOperand());
+
+            if (b.getOpcode() == OP_LOAD) {
+                emitByte(OP_STORE, b.getOperand());
             }
         }
     }
 
     private void addition() {
         multiplication();
-        while (match(MINUS, PLUS)) {
+        while (match(TT_MINUS, TT_PLUS)) {
             Token operator = previous();
             multiplication();
             switch (operator.type) {
-                case MINUS:
-                    emitByte(SUB);
+                case TT_MINUS:
+                    emitByte(OP_SUB);
                     break;
-                case PLUS:
-                    emitByte(ADD);
+                case TT_PLUS:
+                    emitByte(OP_ADD);
                     break;
             }
         }
@@ -92,30 +119,30 @@ public class Compiler {
 
     private void multiplication() {
         unary();
-        while (match(SLASH, STAR)) {
+        while (match(TT_SLASH, TT_STAR)) {
             Token operator = previous();
             unary();
             switch (operator.type) {
-                case SLASH:
-                    emitByte(DIV);
+                case TT_SLASH:
+                    emitByte(OP_DIV);
                     break;
-                case STAR:
-                    emitByte(MUL);
+                case TT_STAR:
+                    emitByte(OP_MUL);
                     break;
             }
         }
     }
 
     private void unary() {
-        if (match(MINUS, PLUS)) {
+        if (match(TT_MINUS, TT_PLUS)) {
             Token operator = previous();
             unary();
             switch (operator.type) {
-                case MINUS:
-                    emitByte(NEG);
+                case TT_MINUS:
+                    emitByte(OP_NEG);
                     break;
-                case PLUS:
-                    emitByte(POS);
+                case TT_PLUS:
+                    emitByte(OP_POS);
                     break;
             }
         } else {
@@ -124,13 +151,13 @@ public class Compiler {
     }
 
     private void primary() {
-        if (match(NUMBER)) {
-            emitByte(CONST, previous().literal);
-        } else if (match(LEFT_PAREN)) {
+        if (match(TT_NUMBER)) {
+            emitByte(OP_CONST, previous().literal);
+        } else if (match(TT_LEFT_PAREN)) {
             expression();
-            consume(RIGHT_PAREN, "Expect ')' after expression.");
-        } else if (match(IDENTIFIER)) {
-            emitByte(LOAD, previous().lexeme);
+            consume(TT_RIGHT_PAREN, "Expect ')' after expression.");
+        } else if (match(TT_IDENTIFIER)) {
+            emitByte(OP_LOAD, previous().lexeme);
         } else {
             throw error(peek(), "Expect expression.");
         }
@@ -170,7 +197,7 @@ public class Compiler {
     }
 
     private boolean isAtEnd() {
-        return peek().type == EOF;
+        return peek().type == TT_EOF;
     }
 
     private Token peek() {
@@ -188,8 +215,8 @@ public class Compiler {
     private void emitByte(OpcodeTable op) {
         emitByte(op, null);
     }
-    
-    private Byte removeByte(){
+
+    private Byte removeByte() {
         return this.current_chunk.removeByte();
     }
 
