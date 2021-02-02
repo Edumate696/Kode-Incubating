@@ -31,7 +31,7 @@ public class Lexer {
         KEYWORDS = new HashMap<>();
         KEYWORDS.put("global", TT_GLOBAL);
         KEYWORDS.put("nonlocal", TT_NON_LOCAL);
-        KEYWORDS.put("exit", TT_EXIT);
+        KEYWORDS.put("print", TT_PRINT);
     }
 
     private final String source;

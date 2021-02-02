@@ -6,7 +6,7 @@
 package internels.vm.scopes;
 
 import java.util.HashMap;
-import internels.vm.type.Type;
+import internels.vm.type.core.KodeObject;
 
 /**
  *
@@ -23,21 +23,21 @@ public interface Scope {
         return retriveVariable(name) != null;
     }
 
-    public Type retriveVariable(String name);
+    public KodeObject retriveVariable(String name);
 
-    public void storeVariable(String name, Type value);
+    public void storeVariable(String name, KodeObject value);
 
 }
 
-class ScopeImpl extends HashMap<String, Type> implements Scope {
+class ScopeImpl extends HashMap<String, KodeObject> implements Scope {
 
     @Override
-    public Type retriveVariable(String name) {
+    public KodeObject retriveVariable(String name) {
         return this.get(name);
     }
 
     @Override
-    public void storeVariable(String name, Type value) {
+    public void storeVariable(String name, KodeObject value) {
         this.put(name, value);
     }
 

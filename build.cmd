@@ -1,2 +1,3 @@
 @echo off
-mvn clean compile assembly:single
+mvn clean compile assembly:single install4j:compile
+pause

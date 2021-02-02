@@ -21,18 +21,40 @@
             <artifactId>j-text-utils</artifactId>
             <version>0.3.4</version>
         </dependency>
+        <dependency>
+           <groupId>com.install4j</groupId>
+           <artifactId>install4j-runtime</artifactId>
+           <version>8.0.9</version>
+           <scope>provided</scope>
+        </dependency>
     </dependencies>
+    
+    <repositories>
+        <repository>
+           <id>ej-technologies</id>
+           <url>https://maven.ej-technologies.com/repository</url>
+        </repository>
+    </repositories>
     <build>
+        <finalName>raw_build</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
                 <configuration>
                     <descriptors>
                         <descriptor>src/main/assembly/assembly.xml</descriptor>
                     </descriptors>
                     <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.install4j</groupId>
+                <artifactId>install4j-maven-plugin</artifactId>
+                <configuration>
+                    <projectFile>${project.basedir}/src/main/install4j/config.install4j</projectFile>
+                    <destination>${project.basedir}/media</destination>
+                    <failIfMissing>true</failIfMissing>
                 </configuration>
             </plugin>
         </plugins>

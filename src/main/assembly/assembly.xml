@@ -5,7 +5,7 @@
     <formats>
         <format>dir</format>
     </formats>
-    <!--<includeBaseDirectory>true</includeBaseDirectory>-->
+    <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
             <outputDirectory>include</outputDirectory>

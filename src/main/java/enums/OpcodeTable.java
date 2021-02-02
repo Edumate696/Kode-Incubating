@@ -16,6 +16,7 @@ public enum OpcodeTable {
     OP_LOAD, OP_STORE, // Variable
 
     OP_GLOBAL, OP_NON_LOCAL, // Scoping
-    OP_EXIT,
+    OP_PRINT,
 
+    OP_ARG_RESET, OP_ARG_PUSH, OP_CALL, // Call
 }

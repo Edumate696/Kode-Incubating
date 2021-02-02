@@ -16,5 +16,5 @@ public enum TokenType {
     TT_NUMBER, TT_IDENTIFIER, //
     TT_COMMA, TT_SEMICOLON, TT_EOF, //Symbols
     // Keywords
-    TT_GLOBAL, TT_NON_LOCAL, TT_EXIT,
+    TT_GLOBAL, TT_NON_LOCAL, TT_PRINT,
 }

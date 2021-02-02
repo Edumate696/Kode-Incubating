@@ -49,21 +49,17 @@ public class Compiler {
     private void statement() {
         if (match(TT_GLOBAL, TT_NON_LOCAL)) {
             scopeDeclarationStatement();
-        } else if (match(TT_EXIT)) {
-            exitStatement();
+        } else if (match(TT_PRINT)) {
+            printStatement();
         } else {
             expressionStatement();
         }
     }
 
-    private void exitStatement() {
-        if (!match(TT_SEMICOLON)) {
-            expression();
-            consume(TT_SEMICOLON, "Expect ';' after exit statement.");
-        } else {
-            emitByte(OP_CONST, 0.0);
-        }
-        emitByte(OP_EXIT);
+    private void printStatement() {
+        expression();
+        consume(TT_SEMICOLON, "Expect ';' after print statement.");
+        emitByte(OP_PRINT);
     }
 
     private void scopeDeclarationStatement() {
@@ -146,8 +142,31 @@ public class Compiler {
                     break;
             }
         } else {
-            primary();
+            call();
         }
+    }
+
+    private void call() {
+        primary();
+        for (;;) {
+            if (match(TT_LEFT_PAREN)) {
+                finishCall();
+            } else {
+                break;
+            }
+        }
+    }
+
+    private void finishCall() {
+        emitByte(OP_ARG_RESET);
+        if (!check(TT_RIGHT_PAREN)) {
+            do {
+                expression();
+                emitByte(OP_ARG_PUSH);
+            } while (match(TT_COMMA));
+        }
+        emitByte(OP_CALL);
+        consume(TT_RIGHT_PAREN, "Expect ')' after arguments.");
     }
 
     private void primary() {

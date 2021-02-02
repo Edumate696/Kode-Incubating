@@ -1,9 +1,8 @@
 
-import static enums.OpcodeTable.OP_POP;
 import io.Printer;
 import io.Scanner;
 import internels.vm.VM;
-import internels.vm.type.Type;
+import internels.vm.type.core.KodeObject;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -16,12 +15,16 @@ import internels.vm.type.Type;
  */
 public final class Main {
 
+    public static void main(String[] args) {
+        Main.REPL();
+    }
+
     private Main() {
 
     }
 
     private static void REPL() {
-        Printer.out.println("Kode Incubating");
+        Printer.out.println("Kode Incubating " + Main.getVersion() + " ["+System.getProperty("kode.home", "Kode Home Not Set")+"]");
         Printer.out.println("Running on " + System.getProperty("os.name", "Unknown Operating System")
                 + " (" + System.getProperty("user.name", "default") + ")");
         VM vm = new VM();
@@ -32,7 +35,7 @@ public final class Main {
                 if (line.equalsIgnoreCase("exit")) {
                     System.exit(0);
                 }
-                Type result = vm.eval("<shell>", line);
+                KodeObject result = vm.eval("<shell>", line);
                 if (result != null) {
                     Printer.out.println(result);
                 }
@@ -44,7 +47,15 @@ public final class Main {
         }
     }
 
-    public static void main(String[] args) {
-        Main.REPL();
+    public static boolean checkUpdate() {
+        return false;
+    }
+
+    public static String getVersion() {
+        try {
+            return com.install4j.api.launcher.Variables.getCompilerVariable("sys.version");
+        } catch (Throwable ex) {
+            return "dev-release";
+        }
     }
 }

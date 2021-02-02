@@ -5,17 +5,18 @@
  */
 package internels.vm;
 
+import internels.vm.type.KodeNumber;
 import internels.compiler.Byte;
 import internels.compiler.Compiler;
 import internels.compiler.Chunk;
 import internels.vm.scopes.Scope;
 import io.Printer;
 import java.util.Objects;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.LinkedList;
-import internels.vm.type.Type;
+import internels.vm.type.core.KodeObject;
+import internels.vm.type.core.KodeType;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,7 +25,7 @@ import java.util.Map;
  */
 public class VM {
 
-    public Type eval(String fn, String src) {
+    public KodeObject eval(String fn, String src) {
         Chunk chunk = Compiler.parse(fn, src);
         debug = Boolean.getBoolean("kode.debug") || Boolean.getBoolean("kode.debug.vm");
         result = null;
@@ -47,8 +48,9 @@ public class VM {
         return result;
     }
 
-    private Type result = null;
-    private final LinkedList<Type> arithmatic_stack = new LinkedList<>();
+    private KodeObject result = null;
+    private final LinkedList<KodeObject> arithmatic_stack = new LinkedList<>();
+    private final LinkedList<KodeObject> argument_queue = new LinkedList<>();
     private boolean debug;
     private final Scope global_table = Scope.buildDefaultScope();
     private final LinkedList<Scope> local_table = new LinkedList<>();
@@ -58,34 +60,34 @@ public class VM {
         for (Byte b : chunk) {
             switch (b.getOpcode()) {
                 case OP_CONST:
-                    push(Type.generate(b.getOperand()));
+                    pushConstant(b.getOperand());
                     break;
                 case OP_POP:
                     this.result = pop();
                     break;
                 case OP_ADD:
-                    binary_operation(Type::__add__);
+                    binary_operation("__add__", "__radd__");
                     break;
                 case OP_SUB:
-                    binary_operation(Type::__sub__);
+                    binary_operation("__sub__", "__rsub__");
                     break;
                 case OP_MUL:
-                    binary_operation(Type::__mul__);
+                    binary_operation("__mul__", "__rmul__");
                     break;
                 case OP_DIV:
-                    binary_operation(Type::__div__);
+                    binary_operation("__div__", "__rdiv__");
                     break;
                 case OP_POS:
-                    unary_operation(Type::__pos__);
+                    unary_operation("__pos__");
                     break;
                 case OP_NEG:
-                    unary_operation(Type::__neg__);
+                    unary_operation("__neg__");
                     break;
                 case OP_LOAD:
-                    push(retriveVariable(b.getOperand()));
+                    retriveVariable(b.getOperand());
                     break;
                 case OP_STORE:
-                    storeVariable(b.getOperand(), peek());
+                    storeVariable(b.getOperand());
                     break;
                 case OP_GLOBAL:
                     custom_binding.put(b.getOperand(), true);
@@ -93,8 +95,17 @@ public class VM {
                 case OP_NON_LOCAL:
                     custom_binding.put(b.getOperand(), false);
                     break;
-                case OP_EXIT:
-                    exitStmtCall(pop());
+                case OP_PRINT:
+                    printStmtCall();
+                    break;
+                case OP_ARG_RESET:
+                    argument_queue.clear();
+                    break;
+                case OP_ARG_PUSH:
+                    argument_queue.add(pop());
+                    break;
+                case OP_CALL:
+                    call_operation();
                     break;
                 default:
                     throw new RuntimeException("Unknown Instruction : " + b);
@@ -106,42 +117,52 @@ public class VM {
         }
     }
 
-    private void binary_operation(BiFunction<Type, Type, Type> op) {
-        Type right = pop();
-        Type left = pop();
-        push(op.apply(left, right));
-    }
-
-    private void unary_operation(Function<Type, Type> op) {
-        push(op.apply(pop()));
-    }
-
-    private void push(Type constant) {
+    private void push(KodeObject constant) {
         arithmatic_stack.push(Objects.requireNonNull(constant, "Null value cannot be pushed."));
     }
 
-    private Type pop() {
+    private KodeObject pop() {
         return arithmatic_stack.pop();
     }
 
-    private Type peek() {
+    private KodeObject peek() {
         return arithmatic_stack.peek();
     }
 
-    private Type retriveVariable(String name) {
-        Type v;
+    private void binary_operation(String op, String rop) {
+        KodeObject right = pop();
+        KodeObject left = pop();
+        push(left);
+    }
+
+    private void unary_operation(String op) {
+        push(pop());
+    }
+
+    private void call_operation() {
+        KodeObject callee = pop();
+        List<KodeObject> args = new LinkedList<>(argument_queue); // Clone argument_queue
+        KodeObject retVal = callee.getType();
+        push(retVal);
+    }
+
+    private void retriveVariable(String name) {
+        KodeObject v;
         for (Scope s : local_table) {
             if ((v = s.retriveVariable(name)) != null) {
-                return v;
+                push(v);
+                return;
             }
         }
         if ((v = global_table.retriveVariable(name)) != null) {
-            return v;
+            push(v);
+            return;
         }
         throw new RuntimeException("Variable '" + name + "' not defind.");
     }
 
-    private void storeVariable(String name, Type value) {
+    private void storeVariable(String name) {
+        KodeObject value = peek();
         if (local_table.isEmpty() || Objects.equals(custom_binding.get(name), Boolean.TRUE)) { // GLOBAL
             global_table.storeVariable(name, value);
         } else if (Objects.equals(custom_binding.get(name), Boolean.FALSE)) { // NON_LOCAL
@@ -163,8 +184,30 @@ public class VM {
         return global_table;
     }
 
-    private void exitStmtCall(Type exitCode) {
-        System.exit(Double.valueOf(exitCode.toString()).intValue());
+    public void biginScope(Scope newScope) {
+        this.local_table.push(newScope);
+    }
+
+    public void biginScope() {
+        biginScope(Scope.buildDefaultScope());
+    }
+
+    public void endScope() {
+        this.local_table.pop();
+    }
+
+    private void printStmtCall() {
+        Printer.out.println(pop());
+    }
+
+    private void pushConstant(Object operand) {
+        KodeObject constant;
+        if (operand instanceof Double) {
+            constant = new KodeNumber((Double) operand);
+        } else {
+            throw new RuntimeException("Unsupported Value.");
+        }
+        push(constant);
     }
 
 }
